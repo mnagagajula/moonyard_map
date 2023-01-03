@@ -19,11 +19,14 @@ size = (1920,1080)
 #size = (2560,1440)
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("MoonYard Top-Down")
-moon = (255,255,255)
-red = (255,0,0)
-blue = (0,255,255)
-green = (100,200,0)
-iris = (255,int(255*.843),0)
+moon = pygame.Color(255,255,255)
+red = pygame.Color(200,50,50)
+blue = pygame.Color(0,250,250)
+green = pygame.Color(100,250,100)
+darkblue = pygame.Color(100,150,250)
+purple = pygame.Color(150,0,200)
+pink = pygame.Color(200,0,200)
+iris = pygame.Color(255,int(255*.843),0)
 screen.fill(moon)
 pygame.display.flip()
 done = False
@@ -212,20 +215,51 @@ while not done:
                     x1 = ((p[0]-(1920/2))*math.cos(-angle*math.pi/180))-((p[1]-(1080/2))*math.sin(-angle*math.pi/180)) + (1920/2)
                     y1 = ((p[0]-(1920/2))*math.sin(-angle*math.pi/180))+((p[1]-(1080/2))*math.cos(-angle*math.pi/180)) + (1080/2)
                     p[0],p[1] = int(x1),int(y1)
-                    offset[2] += angle
+                offset[2] += angle
 
             if(event.key == pygame.K_a):
                 for p in loc:
                     x1 = ((p[0]-(1920/2))*math.cos(angle*math.pi/180))-((p[1]-(1080/2))*math.sin(angle*math.pi/180)) + (1920/2)
                     y1 = ((p[0]-(1920/2))*math.sin(angle*math.pi/180))+((p[1]-(1080/2))*math.cos(angle*math.pi/180)) + (1080/2)
                     p[0],p[1] = int(x1),int(y1)
-                    offset[2] -= angle
+                offset[2] -= angle
 
-            if(event.key == pygame.K_c and poi_selected == True):
+            if(event.key == pygame.K_r and poi_selected == True):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
                         if(p[3] != red): p[3] = red
                         else: p[3] = blue
+            if(event.key == pygame.K_g and poi_selected == True):
+                for p in loc:
+                    if(p[0] == cur[0] and p[1] == cur[1]):
+                        if(p[3] != green): p[3] = green
+                        else: p[3] = blue
+            if(event.key == pygame.K_b and poi_selected == True):
+                for p in loc:
+                    if(p[0] == cur[0] and p[1] == cur[1]):
+                        p[3] = blue
+            if(event.key == pygame.K_c and poi_selected == True):
+                for p in loc:
+                    if(p[0] == cur[0] and p[1] == cur[1]):
+                        if(p[3] == blue):
+                            p[3] = darkblue
+                        elif(p[3] == darkblue):
+                            p[3] = purple
+                        elif(p[3] == purple):
+                            p[3] = pink 
+                        elif(p[3] == pink): 
+                            p[3] = red
+            if(event.key == pygame.K_x and poi_selected == True):
+                for p in loc:
+                    if(p[0] == cur[0] and p[1] == cur[1]):
+                        if(p[3] == red):
+                            p[3] = pink
+                        elif(p[3] == pink):
+                            p[3] = purple
+                        elif(p[3] == purple):
+                            p[3] = darkblue
+                        elif(p[3] == darkblue): 
+                            p[3] = blue
             if(event.key == pygame.K_DELETE and poi_selected == True):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
