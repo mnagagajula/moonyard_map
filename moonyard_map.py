@@ -47,7 +47,8 @@ def getPos():
 def addPoi():
     pos = getPos()
     pygame.draw.circle(screen,blue,pos,radius)
-    loc.append([pos[0],pos[1],int(radius*(my_size/1.25)),blue])
+    loc.append([pos[0],pos[1],int(radius*(my_size/1.25)),blue, len(loc) + 1])
+    
 
 def addCur(x,y,r):
     if(not cur == None):
@@ -57,20 +58,26 @@ def redrawPoi():
     for p in loc:
         pygame.draw.circle(screen,p[3],(p[0],p[1]),p[2])
         font = pygame.font.Font(None,30)
-        text = font.render(f'Dist: {int((math.sqrt(((p[0]-(1920/2))**2)+((p[1]-(1080/2))**2))/my_size))-p[2]} cm  Size: {int(p[2]/(2))} cm',False,(0,0,0))
-        screen.blit(text, (p[0]-p[2]//2,p[1]-p[2]//2))
-
+        num = font.render(str(p[4]), True, (0,0,0))
+        screen.blit(num, (p[0]-5, p[1]-10))
+        #text = font.render(f'Dist: {int((math.sqrt(((p[0]-(1920/2))**2)+((p[1]-(1080/2))**2))/my_size))-p[2]} cm  Size: {int(p[2]/(2))} cm',False,(0,0,0))
+        #screen.blit(text, (p[0]-p[2]//2,p[1]-p[2]//2))
+        
 def redrawCur():
     if(not cur == None and poi_selected == True):
         pygame.draw.circle(screen,green,(cur[0],cur[1]),cur[2]+10)
 
 def redrawGrid():
     for i in range(int(-abs(offset[0])//(100/my_size)),int(size[0]//(100/my_size)) + int(abs(offset[0])//(100/my_size)) + 2):
-        lC = abs(int(math.sin(50*i*math.pi/180)*111))
-        pygame.draw.line(screen,(lC,lC,lC),((100/my_size*i)+offset[0],0),((100/my_size*i)+offset[0],size[1]),3)
+        if(i % 3 == 0):
+            pygame.draw.line(screen,(32,32,32),((100/my_size*i),0),((100/my_size*i),size[1]),3)
+        else:
+            pygame.draw.line(screen,(96,96,96),((100/my_size*i),0),((100/my_size*i),size[1]),2)            
     for i in range(int(-abs(offset[1])//(100/my_size)),int(size[1]//(100/my_size)) + int(abs(offset[1])//(100/my_size)) + 2):  
-        lC = abs(int(math.sin(50*i*math.pi/180)*111))
-        pygame.draw.line(screen,(lC,lC,lC),(0,(100/my_size*i)-offset[1]),(size[0],(100/my_size*i)-offset[1]),3)
+        if(i % 3 == 0):
+            pygame.draw.line(screen,(32,32,32),(0,(100/my_size*i)),(size[0],(100/my_size*i)),3)
+        else:
+            pygame.draw.line(screen,(96,96,96),(0,(100/my_size*i)),(size[0],(100/my_size*i)),2)
 
 def redrawAtlas():
     font = pygame.font.Font(None,40)
