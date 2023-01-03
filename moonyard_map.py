@@ -65,7 +65,7 @@ def redrawPoi():
         
 def redrawCur():
     if(not cur == None and poi_selected == True):
-        pygame.draw.circle(screen,green,(cur[0],cur[1]),cur[2]+10)
+        pygame.draw.circle(screen,((150,150,150)),(cur[0],cur[1]),cur[2]+10)
 
 def redrawGrid():
     for i in range(int(-abs(offset[0])//(100/my_size)),int(size[0]//(100/my_size)) + int(abs(offset[0])//(100/my_size)) + 2):
@@ -81,7 +81,7 @@ def redrawGrid():
 
 def redrawAtlas():
     font = pygame.font.Font(None,40)
-    text = font.render(f'X: {offset[0]} Y: {offset[1]} H: {offset[2]%360}',False,(0,0,0))
+    text = font.render(f'X: {offset[0]} Y: {offset[1]} A: {offset[2]%360}',False,(0,0,0))
     screen.blit(text, (0,0))
 
 def redrawDist():
