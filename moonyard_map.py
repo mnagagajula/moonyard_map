@@ -18,7 +18,7 @@ pygame.init()
 size = (1920,1080)
 step = 40
 #size = (2560,1440)
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size, pygame.RESIZABLE)
 irisCoords = (screen.get_width()/2, screen.get_height()/2, 120, 80)
 pygame.display.set_caption("MoonYard Top-Down")
 moon = pygame.Color(255,255,255)
