@@ -16,8 +16,10 @@ class Key(pygame.sprite.Sprite):
 pygame.init()
 #size = (pygame.display.Info().current_w,pygame.display.Info().current_h)
 size = (1920,1080)
+step = 40
 #size = (2560,1440)
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+irisCoords = (screen.get_width()/2, screen.get_height()/2, 120, 80)
 pygame.display.set_caption("MoonYard Top-Down")
 moon = pygame.Color(255,255,255)
 red = pygame.Color(200,50,50)
@@ -35,8 +37,8 @@ offset = [0,0,0] # x,y,deg
 loc = []
 cur = [0,0,0,None]
 radius = 20
-angle = 1
-MoonYard_Scale = 5 # This number controls how much the map shifts
+angle = 5
+MoonYard_Scale = 20 # This number controls how much the map shifts
 my_size = 2.54
 poi_selected = False
 
@@ -68,43 +70,90 @@ def redrawCur():
         pygame.draw.circle(screen,((150,150,150)),(cur[0],cur[1]),cur[2]+10)
 
 def redrawGrid():
-    for i in range(int(-abs(offset[0])//(100/my_size)),int(size[0]//(100/my_size)) + int(abs(offset[0])//(100/my_size)) + 2):
-        if(i % 3 == 0):
-            pygame.draw.line(screen,(32,32,32),((100/my_size*i),0),((100/my_size*i),size[1]),3)
-        else:
-            pygame.draw.line(screen,(96,96,96),((100/my_size*i),0),((100/my_size*i),size[1]),2)            
-    for i in range(int(-abs(offset[1])//(100/my_size)),int(size[1]//(100/my_size)) + int(abs(offset[1])//(100/my_size)) + 2):  
-        if(i % 3 == 0):
-            pygame.draw.line(screen,(32,32,32),(0,(100/my_size*i)),(size[0],(100/my_size*i)),3)
-        else:
-            pygame.draw.line(screen,(96,96,96),(0,(100/my_size*i)),(size[0],(100/my_size*i)),2)
+
+
+    p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1102), screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1102))
+    p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1102), screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1102))
+
+    #pygame.draw.line(screen, (32, 32, 32), p3, p4, 2)
+
+    if(offset[2] < 45 or offset[2] > 315):
+        for i in range(-25, 25, 1):    
+            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1102), screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1102) - int(step/math.cos(offset[2] * math.pi / 180))*i)
+            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1102), screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1102) - int(step/math.cos(offset[2] * math.pi / 180))*i)
+            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.cos(offset[2] * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1102))
+            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.cos(offset[2] * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1102))
+            pygame.draw.line(screen, (32, 32, 32), p5, p6, 2)
+            pygame.draw.line(screen, (32, 32, 32), p3, p4, 2)
+    elif(offset[2] < 135):
+        for i in range(-25, 25, 1):    
+            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1102) - int(step/math.sin(offset[2] * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1102))
+            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1102) - int(step/math.sin(offset[2] * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1102))
+            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1102), screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.sin(offset[2] * math.pi / 180))*i)
+            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1102), screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.sin(offset[2] * math.pi / 180))*i)
+            pygame.draw.line(screen, (32, 32, 32), p5, p6, 2)
+            pygame.draw.line(screen, (32, 32, 32), p3, p4, 2)
+
+    elif(offset[2] < 225):
+        for i in range(-25, 25, 1):    
+            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1102), screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1102) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i)
+            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1102), screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1102) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i)
+            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1102))
+            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1102))
+            pygame.draw.line(screen, (32, 32, 32), p5, p6, 2)
+            pygame.draw.line(screen, (32, 32, 32), p3, p4, 2)
+
+    else:
+        for i in range(-25, 25, 1):    
+            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1102) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1102))
+            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1102) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1102))
+            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1102), screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
+            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1102), screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1102) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
+            pygame.draw.line(screen, (32, 32, 32), p5, p6, 2)
+            pygame.draw.line(screen, (32, 32, 32), p3, p4, 2)
+
+        
+        
+
 
 def redrawAtlas():
     font = pygame.font.Font(None,40)
-    text = font.render(f'X: {offset[0]} Y: {offset[1]} A: {offset[2]%360}',False,(0,0,0))
+    text = font.render(f'X: {offset[0]} Y: {offset[1]} A: {offset[2]}',False,(0,0,0))
     screen.blit(text, (0,0))
 
 def redrawDist():
     for p in loc:
-        pygame.draw.line(screen,(0,0,0),(1920//2,1080//2),(p[0],p[1]),2)
+        pygame.draw.line(screen,(0,0,0),(screen.get_width()//2,screen.get_height()//2),(p[0],p[1]),2)
 
 def redrawIris():
-    pygame.draw.rect(screen,iris,((size[0]//2 - 80, size[1]//2 - 40),(120,80)))
-    #pygame.draw.rect(screen,iris,((size[1]//2 - 80, size[0]//2 - 40),(80, 120)))
+    surf =  pygame.Surface((120, 80))
+    surf.fill(iris)
+    #set a color key for blitting
+    surf.set_colorkey((255, 0, 0))
+
+    blittedRect = pygame.Rect(irisCoords[0] - irisCoords[2]//2, irisCoords[1] - irisCoords[3]//2, irisCoords[2], irisCoords[3])
+    oldCenter = blittedRect.center
+    rotatedSurf =  pygame.transform.rotate(surf, offset[2])
+    rotRect = rotatedSurf.get_rect()
+    rotRect.center = oldCenter
+    screen.blit(rotatedSurf, rotRect)
+    pygame.display.flip()
+
 
 def resizeScreen():
     #screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
     pass
 
 def redrawAll():
+    offset[2] = offset[2] % 360
     resizeScreen()
     screen.fill(moon)
     redrawGrid()
     redrawCur()
     redrawDist()
     redrawPoi()
-    redrawIris()
     redrawAtlas()
+    redrawIris()
     pygame.display.update()
 
 while not done:
@@ -167,69 +216,83 @@ while not done:
             if(event.key == pygame.K_LEFT and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] -= MoonYard_Scale
+                        p[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        p[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                         if(cur != None):
-                            cur[0] -= MoonYard_Scale
+                            cur[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                            cur[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
             elif(event.key == pygame.K_LEFT):
-                poi_selected = False
                 offset[0] += MoonYard_Scale
                 for p in loc:
-                    p[0] += MoonYard_Scale
+                    p[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    p[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                     if(cur != None):
-                        cur[0] += MoonYard_Scale
+                        cur[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        cur[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
             if(event.key == pygame.K_RIGHT and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] += MoonYard_Scale
+                        p[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        p[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                         if(cur != None):
-                            cur[0] += MoonYard_Scale
+                            cur[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                            cur[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
             elif(event.key == pygame.K_RIGHT):
-                poi_selected = False
                 offset[0] -= MoonYard_Scale
                 for p in loc:
-                    p[0] -= MoonYard_Scale
+                    p[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    p[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                     if(cur != None):
-                        cur[0] -= MoonYard_Scale
+                        cur[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        cur[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
             if((event.key == pygame.K_UP or event.key == pygame.K_w) and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[1] -= MoonYard_Scale
+                        p[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        p[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                         if(cur != None):
-                            cur[1] -= MoonYard_Scale
+                            cur[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                            cur[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
             elif(event.key == pygame.K_UP or event.key == pygame.K_w):
-                poi_selected = False
                 offset[1] -= MoonYard_Scale
                 for p in loc:
-                    p[1] += MoonYard_Scale
+                    p[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    p[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                     if(cur != None):
-                        cur[1] += MoonYard_Scale
+                        cur[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        cur[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
             if((event.key == pygame.K_DOWN or event.key == pygame.K_s) and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[1] += MoonYard_Scale
+                        p[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        p[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                         if(cur != None):
-                            cur[1] += MoonYard_Scale
+                            cur[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                            cur[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
             elif(event.key == pygame.K_DOWN or event.key == pygame.K_s):
-                poi_selected = False
                 offset[1] += MoonYard_Scale
                 for p in loc:
-                    p[1] -= MoonYard_Scale
+                    p[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    p[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                     if(cur != None):
-                        cur[1] -= MoonYard_Scale
+                        cur[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        cur[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
 
             if(event.key == pygame.K_d):
-                for p in loc:
-                    x1 = ((p[0]-(1920/2))*math.cos(-angle*math.pi/180))-((p[1]-(1080/2))*math.sin(-angle*math.pi/180)) + (1920/2)
-                    y1 = ((p[0]-(1920/2))*math.sin(-angle*math.pi/180))+((p[1]-(1080/2))*math.cos(-angle*math.pi/180)) + (1080/2)
-                    p[0],p[1] = int(x1),int(y1)
-                offset[2] += angle
+
+                #for p in loc:
+                #    x1 = ((p[0]-(1920/2))*math.cos(-angle*math.pi/180))-((p[1]-(1080/2))*math.sin(-angle*math.pi/180)) + (1920/2)
+                #    y1 = ((p[0]-(1920/2))*math.sin(-angle*math.pi/180))+((p[1]-(1080/2))*math.cos(-angle*math.pi/180)) + (1080/2)
+                #    p[0],p[1] = int(x1),int(y1)
+                offset[2] -= angle
 
             if(event.key == pygame.K_a):
-                for p in loc:
-                    x1 = ((p[0]-(1920/2))*math.cos(angle*math.pi/180))-((p[1]-(1080/2))*math.sin(angle*math.pi/180)) + (1920/2)
-                    y1 = ((p[0]-(1920/2))*math.sin(angle*math.pi/180))+((p[1]-(1080/2))*math.cos(angle*math.pi/180)) + (1080/2)
-                    p[0],p[1] = int(x1),int(y1)
-                offset[2] -= angle
+
+                #for p in loc:
+                #    x1 = ((p[0]-(1920/2))*math.cos(angle*math.pi/180))-((p[1]-(1080/2))*math.sin(angle*math.pi/180)) + (1920/2)
+                #    y1 = ((p[0]-(1920/2))*math.sin(angle*math.pi/180))+((p[1]-(1080/2))*math.cos(angle*math.pi/180)) + (1080/2)
+                #    p[0],p[1] = int(x1),int(y1)
+                offset[2] += angle
 
             if(event.key == pygame.K_r and poi_selected == True):
                 for p in loc:
