@@ -34,10 +34,11 @@ pygame.display.flip()
 done = False
 clock = pygame.time.Clock()
 offset = [0,0,0] # x,y,deg
+screenPos = [0,0] #x,y 
 loc = []
 cur = [0,0,0,None]
 radius = 20
-angle = 10
+angle = 1
 MoonYard_Scale = 20 # This number controls how much the map shifts
 my_size = 2.54
 poi_selected = False
@@ -128,7 +129,7 @@ def redrawGrid():
 
 def redrawAtlas():
     font = pygame.font.Font(None,40)
-    text = font.render(f'X: {offset[0]} Y: {offset[1]} A: {offset[2]}',False,(150,150,150))
+    text = font.render(f'X: {offset[0]//4} Y: {offset[1]//4} A: {offset[2]}',False,(150,150,150))
     screen.blit(text, (0,0))
 
 def redrawDist():
@@ -146,6 +147,8 @@ def redrawIris():
     rotatedSurf =  pygame.transform.rotate(surf, offset[2])
     rotRect = rotatedSurf.get_rect()
     rotRect.center = oldCenter
+    offset[0] = (oldCenter[0] - 768 - screenPos[0])
+    offset[1] = (oldCenter[1] - 420 - screenPos[1])
     pygame.draw.circle(screen, iris, rotRect.center, 72, 2)
     screen.blit(rotatedSurf, rotRect)
     pygame.display.flip()
@@ -257,45 +260,43 @@ while not done:
                             cur[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
             elif(event.key == pygame.K_UP):
-                offset[0] += MoonYard_Scale
                 irisCoords[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                 irisCoords[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
             if(event.key == pygame.K_DOWN and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                        p[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        p[0] += math.sin(offset[2] * math.pi / 180) * MoonYard_Scale
+                        p[1] += math.cos(offset[2] * math.pi / 180) * MoonYard_Scale
                         if(cur != None):
                             cur[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
             elif(event.key == pygame.K_DOWN):
-                offset[0] -= MoonYard_Scale
                 irisCoords[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                 irisCoords[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
             if(event.key == pygame.K_a):
                 for p in loc:
                     p[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                     p[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                irisCoords[0] -= MoonYard_Scale
+                screenPos[0] -= MoonYard_Scale
             if(event.key == pygame.K_d):
                 for p in loc:
                     p[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                     p[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                irisCoords[0] += MoonYard_Scale
+                screenPos[0] += MoonYard_Scale
             if(event.key == pygame.K_s):
                 for p in loc:
                     p[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                     p[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                irisCoords[1] += MoonYard_Scale
+                screenPos[1] += MoonYard_Scale
             if(event.key == pygame.K_w):
                 for p in loc:
                     p[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                     p[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                irisCoords[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)              
+                irisCoords[1] -= MoonYard_Scale
+                screenPos[1] -= MoonYard_Scale              
 
             if(event.key == pygame.K_r and poi_selected == True):
                 for p in loc:
