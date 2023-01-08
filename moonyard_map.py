@@ -42,6 +42,7 @@ angle = 1
 MoonYard_Scale = 20 # This number controls how much the map shifts
 my_size = 2.54
 poi_selected = False
+rovPos = [0,0]
 
 def getPos():
     pos = pygame.mouse.get_pos()
@@ -64,12 +65,19 @@ def redrawPoi():
             font = pygame.font.Font(None,30)
             num = font.render(str(p[4]), True, (0,0,0))
             screen.blit(num, (p[0]-5, p[1]-10))
+            #if(p[0] == cur[0] and p[1] == cur[1]):
+            #    angle = math.tan((abs(p[1] - rovPos[1]))/(abs(p[0] - rovPos[0])) * math.pi /180)*180/math.pi
+            #    font = pygame.font.Font(None,20)
+            #    text = font.render(f'{angle} deg',False,(0,0,0))
+            #    screen.blit(text, (p[0] - 25, p[1] + 10))
         #text = font.render(f'Dist: {int((math.sqrt(((p[0]-(1920/2))**2)+((p[1]-(1080/2))**2))/my_size))-p[2]} cm  Size: {int(p[2]/(2))} cm',False,(0,0,0))
         #screen.blit(text, (p[0]-p[2]//2,p[1]-p[2]//2))
         
 def redrawCur():
     if(not cur == None and poi_selected == True):
-        pygame.draw.circle(screen,((150,150,150)),(cur[0],cur[1]),cur[2]+10)
+        for p in loc:
+            if(p[0] == cur[0] and p[1] == cur[1]):
+                pygame.draw.line(screen,p[3],(irisCoords[0],irisCoords[1]),(p[0],p[1]),3)
 
 def redrawGrid():
 
@@ -147,8 +155,9 @@ def redrawIris():
     rotatedSurf =  pygame.transform.rotate(surf, offset[2])
     rotRect = rotatedSurf.get_rect()
     rotRect.center = oldCenter
-    offset[0] = (oldCenter[0] - 768 - screenPos[0])
-    offset[1] = (oldCenter[1] - 420 - screenPos[1])
+    offset[0] = (oldCenter[0] - 960 - screenPos[0]) #960 for big screen
+    offset[1] = (oldCenter[1] - 540 - screenPos[1]) #540 for big screen
+    rovPos = oldCenter
     pygame.draw.circle(screen, iris, rotRect.center, 72, 2)
     screen.blit(rotatedSurf, rotRect)
     pygame.display.flip()
@@ -167,8 +176,8 @@ def redrawAll():
     resizeScreen()
     screen.fill(moon)
     redrawGrid()
+    #redrawDist()
     redrawCur()
-    redrawDist()
     redrawPoi()
     redrawAtlas()
     redrawIris()
