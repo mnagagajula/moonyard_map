@@ -35,6 +35,9 @@ done = False
 clock = pygame.time.Clock()
 offset = [0,0,0] # x,y,deg
 screenPos = [0,0] #x,y 
+rovPos = [0,0] #rov center
+#screenCen = [768, 420]
+screenCen = [960, 540]
 loc = []
 cur = [0,0,0,None]
 radius = 20
@@ -42,7 +45,7 @@ angle = 1
 MoonYard_Scale = 20 # This number controls how much the map shifts
 my_size = 2.54
 poi_selected = False
-rovPos = [0,0]
+
 
 def getPos():
     pos = pygame.mouse.get_pos()
@@ -79,14 +82,34 @@ def redrawCur():
             if(p[0] == cur[0] and p[1] == cur[1]):
                 pygame.draw.line(screen,p[3],(irisCoords[0],irisCoords[1]),(p[0],p[1]),3)
 
+def redrawIris():
+    surf =  pygame.Surface((120, 80))
+    surf.fill(iris)
+    #set a color key for blitting
+    surf.set_colorkey((255, 0, 0))
+
+    blittedRect = pygame.Rect(irisCoords[0] - irisCoords[2]//2, irisCoords[1] - irisCoords[3]//2, irisCoords[2], irisCoords[3])
+    oldCenter = blittedRect.center
+    rotatedSurf =  pygame.transform.rotate(surf, offset[2])
+    rotRect = rotatedSurf.get_rect()
+    rotRect.center = oldCenter
+    offset[0] = (oldCenter[0] - screenCen[0] - screenPos[0])
+    offset[1] = (oldCenter[1] - screenCen[1] - screenPos[1])
+
+    pygame.draw.circle(screen, iris, rotRect.center, 72, 2)
+    screen.blit(rotatedSurf, rotRect)
+    pygame.display.flip()
+
 def redrawGrid():
+    rovPos[0] = offset[0] + screenCen[0] + screenPos[0]
+    rovPos[1] = offset[1] + screenCen[1] + screenPos[1]
 
     if(offset[2] < 45 or offset[2] > 315):
         for i in range(-50, 50, 1):    
-            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1502), screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1502) - int(step/math.cos(offset[2] * math.pi / 180))*i)
-            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1502), screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1502) - int(step/math.cos(offset[2] * math.pi / 180))*i)
-            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.cos(offset[2] * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1502))
-            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.cos(offset[2] * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1502))
+            p5 = (rovPos[0] + int(math.cos(-offset[2] * math.pi/180) * 3000)- 0, rovPos[1] + int(math.sin(-offset[2] * math.pi/180) * 3000) - int(step/math.cos(offset[2] * math.pi / 180))*i)
+            p6 = (rovPos[0] - int(math.cos(-offset[2] * math.pi/180) * 3000)- 0, rovPos[1] - int(math.sin(-offset[2] * math.pi/180) * 3000) - int(step/math.cos(offset[2] * math.pi / 180))*i)
+            p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos(offset[2] * math.pi / 180))*i- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
+            p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos(offset[2] * math.pi / 180))*i- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
             if(i % 3 == 0):
                 pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
                 pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
@@ -96,10 +119,10 @@ def redrawGrid():
             
     elif(offset[2] < 135):
         for i in range(-50, 50, 1):    
-            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1502) - int(step/math.sin(offset[2] * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1502))
-            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1502) - int(step/math.sin(offset[2] * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1502))
-            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1502), screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.sin(offset[2] * math.pi / 180))*i)
-            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1502), screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.sin(offset[2] * math.pi / 180))*i)
+            p5 = (rovPos[0] + int(math.cos(-offset[2] * math.pi/180) * 3000) - int(step/math.sin(offset[2] * math.pi / 180))*i- 0, rovPos[1] + int(math.sin(-offset[2] * math.pi/180) * 3000))
+            p6 = (rovPos[0] - int(math.cos(-offset[2] * math.pi/180) * 3000) - int(step/math.sin(offset[2] * math.pi / 180))*i- 0, rovPos[1] - int(math.sin(-offset[2] * math.pi/180) * 3000))
+            p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin(offset[2] * math.pi / 180))*i)
+            p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin(offset[2] * math.pi / 180))*i)
             if(i % 3 == 0):
                 pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
                 pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
@@ -109,10 +132,10 @@ def redrawGrid():
 
     elif(offset[2] < 225):
         for i in range(-50, 50, 1):    
-            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1502), screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1502) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i)
-            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1502), screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1502) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i)
-            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1502))
-            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1502))
+            p5 = (rovPos[0] + int(math.cos(-offset[2] * math.pi/180) * 3000)- 0, rovPos[1] + int(math.sin(-offset[2] * math.pi/180) * 3000) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i)
+            p6 = (rovPos[0] - int(math.cos(-offset[2] * math.pi/180) * 3000)- 0, rovPos[1] - int(math.sin(-offset[2] * math.pi/180) * 3000) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i)
+            p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
+            p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
             if(i % 3 == 0):
                 pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
                 pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
@@ -121,10 +144,10 @@ def redrawGrid():
                 pygame.draw.line(screen, (100, 100, 100), p3, p4, 2)
     else:
         for i in range(-50, 50, 1):    
-            p5 = (screen.get_width()//2 + int(math.cos(-offset[2] * math.pi/180) * 1502) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i, screen.get_height()//2 + int(math.sin(-offset[2] * math.pi/180) * 1502))
-            p6 = (screen.get_width()//2 - int(math.cos(-offset[2] * math.pi/180) * 1502) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i, screen.get_height()//2 - int(math.sin(-offset[2] * math.pi/180) * 1502))
-            p3 = (screen.get_width()//2 - int(math.cos(-(90-offset[2]) * math.pi/180) * 1502), screen.get_height()//2 + int(math.sin(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
-            p4 = (screen.get_width()//2 + int(math.cos(-(90-offset[2]) * math.pi/180) * 1502), screen.get_height()//2 - int(math.sin(-(90-offset[2]) * math.pi/180) * 1502) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
+            p5 = (rovPos[0] + int(math.cos(-offset[2] * math.pi/180) * 3000) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i- 0, rovPos[1] + int(math.sin(-offset[2] * math.pi/180) * 3000))
+            p6 = (rovPos[0] - int(math.cos(-offset[2] * math.pi/180) * 3000) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i- 0, rovPos[1] - int(math.sin(-offset[2] * math.pi/180) * 3000))
+            p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
+            p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
             if(i % 3 == 0):
                 pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
                 pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
@@ -143,29 +166,6 @@ def redrawAtlas():
 def redrawDist():
     for p in loc:
         pygame.draw.line(screen,p[3],(irisCoords[0],irisCoords[1]),(p[0],p[1]),3)
-
-def redrawIris():
-    surf =  pygame.Surface((120, 80))
-    surf.fill(iris)
-    #set a color key for blitting
-    surf.set_colorkey((255, 0, 0))
-
-    blittedRect = pygame.Rect(irisCoords[0] - irisCoords[2]//2, irisCoords[1] - irisCoords[3]//2, irisCoords[2], irisCoords[3])
-    oldCenter = blittedRect.center
-    rotatedSurf =  pygame.transform.rotate(surf, offset[2])
-    rotRect = rotatedSurf.get_rect()
-    rotRect.center = oldCenter
-    offset[0] = (oldCenter[0] - 960 - screenPos[0]) #960 for big screen
-    offset[1] = (oldCenter[1] - 540 - screenPos[1]) #540 for big screen
-    rovPos = oldCenter
-    pygame.draw.circle(screen, iris, rotRect.center, 72, 2)
-    screen.blit(rotatedSurf, rotRect)
-    pygame.display.flip()
-
-    
-
-    
-
 
 def resizeScreen():
     #screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
