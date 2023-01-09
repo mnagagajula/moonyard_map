@@ -342,7 +342,11 @@ while not done:
             if(event.key == pygame.K_DELETE and poi_selected == True):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
+                        temp = p
                         loc.remove(p)
+                        for p in loc:
+                            if(p[4] > temp[4]):
+                                p[4] -= 1
                         poi_selected = False
                         print("Removed POI")
 
