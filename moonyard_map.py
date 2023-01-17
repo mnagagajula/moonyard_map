@@ -45,6 +45,14 @@ angle = 1
 MoonYard_Scale = 20 # This number controls how much the map shifts
 my_size = 2.54
 poi_selected = False
+path_mode = False
+path_number = 0
+path_point_selected = False
+cur_path_point = (0, 0)
+paths = []
+path_colors = (red, blue, darkblue, purple, pink)
+for i in range(5):
+    paths.append([])
 
 
 def getPos():
@@ -81,6 +89,28 @@ def redrawCur():
         for p in loc:
             if(p[0] == cur[0] and p[1] == cur[1]):
                 pygame.draw.line(screen,p[3],(irisCoords[0],irisCoords[1]),(p[0],p[1]),3)
+
+def addPathPoint():
+    pos = getPos()
+    pygame.draw.circle(screen, path_colors[path_number], pos, 5)
+    paths[path_number].append(pos)
+
+def redrawPathPoints():
+    i = 0
+    for path in paths:
+        prev = None
+        for point in path:
+            pygame.draw.circle(screen, path_colors[i], point, 5)
+            if prev:
+                pygame.draw.line(screen, path_colors[i], prev, point, 3)
+            prev = point
+        i += 1
+
+def redrawCurPathPoint():
+    i = cur_path_point[0]
+    j = cur_path_point[1]
+    if(path_point_selected):
+        pygame.draw.circle(screen, (255, 255, 255), paths[i][j], 5, 2)
 
 def redrawIris():
     surf =  pygame.Surface((120, 80))
@@ -179,6 +209,8 @@ def redrawAll():
     #redrawDist()
     redrawCur()
     redrawPoi()
+    redrawPathPoints()
+    redrawCurPathPoint()
     redrawAtlas()
     redrawIris()
     pygame.display.update()
@@ -194,7 +226,7 @@ while not done:
             x = pos[0]
             y = pos[1]
             #print(x,y,event.button)
-            if(event.button == 1):
+            if(event.button == 1 and not path_mode):
                 poi_selected = False
                 dc = False
                 for i in range(len(loc)):
@@ -210,7 +242,13 @@ while not done:
                     cur = [x,y,radius,green]
                     addCur(cur[0],cur[1],cur[2])
                     pygame.display.update()
-            elif(event.button == 3):
+            elif(event.button == 1):
+                path_selected = True
+                addPathPoint()
+                cur_path_point = (path_number, len(paths[path_number]) - 1)
+                path_point_selected = True
+                pygame.display.update
+            elif(event.button == 3 and not path_mode):
                 poi_selected = False
                 for i in range(len(loc)):
                     if((x<loc[i][0]+(loc[i][2]) and x>loc[i][0]-(loc[i][2])) and (y<loc[i][1]+(loc[i][2]) and y>loc[i][1]-(loc[i][2]))):
@@ -223,6 +261,13 @@ while not done:
                     pygame.display.update()
                 else:
                     cur = None
+            elif(event.button == 3):
+                path_point_selected = False
+                for i in range (len(paths)):
+                    for j in range (len(paths[i])):
+                        if ((x < paths[i][j][0] + 5 and x < paths[i][j][0]) - 5 and (y < paths[i][j][1] + 5 and y > paths[i][j][1] - 5)):
+                            cur_path_point = (i, j)
+                            path_point_selected = True
             if(event.button == 4 and poi_selected):
                 i=0
                 for p in loc:
@@ -248,8 +293,17 @@ while not done:
                         if(cur != None):
                             cur[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+            elif(event.key == pygame.K_LEFT and path_point_selected):
+                i = cur_path_point[0]
+                j = cur_path_point[1]
+                old_x = paths[i][j][0]
+                old_y = paths[i][j][1]
+                new_x = old_x - int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                new_y = old_y + int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                paths[i][j] = (new_x, new_y)
             elif(event.key == pygame.K_LEFT):
                 offset[2] += angle
+
             if(event.key == pygame.K_RIGHT and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
@@ -258,8 +312,17 @@ while not done:
                         if(cur != None):
                             cur[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+            elif(event.key == pygame.K_RIGHT and path_point_selected):
+                i = cur_path_point[0]
+                j = cur_path_point[1]
+                old_x = paths[i][j][0]
+                old_y = paths[i][j][1]
+                new_x = old_x + int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                new_y = old_y - int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                paths[i][j] = (new_x, new_y)
             elif(event.key == pygame.K_RIGHT):
                 offset[2] -= angle
+
             if(event.key == pygame.K_UP and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
@@ -268,9 +331,18 @@ while not done:
                         if(cur != None):
                             cur[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+            elif(event.key == pygame.K_UP and path_point_selected):
+                i = cur_path_point[0]
+                j = cur_path_point[1]
+                old_x = paths[i][j][0]
+                old_y = paths[i][j][1]
+                new_x = old_x - int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                new_y = old_y - int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                paths[i][j] = (new_x, new_y)
             elif(event.key == pygame.K_UP):
                 irisCoords[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                 irisCoords[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+
             if(event.key == pygame.K_DOWN and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
@@ -279,27 +351,48 @@ while not done:
                         if(cur != None):
                             cur[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+            elif(event.key == pygame.K_DOWN and path_point_selected):
+                i = cur_path_point[0]
+                j = cur_path_point[1]
+                old_x = paths[i][j][0]
+                old_y = paths[i][j][1]
+                new_x = old_x + int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                new_y = old_y + int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                paths[i][j] = (new_x, new_y)
             elif(event.key == pygame.K_DOWN):
                 irisCoords[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                 irisCoords[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+
             if(event.key == pygame.K_a):
                 for p in loc:
                     p[0] -= MoonYard_Scale
+                for i in range(len(paths)):
+                    for j in range(len(paths[i])):
+                        paths[i][j] = (paths[i][j][0] - MoonYard_Scale, paths[i][j][1])
                 irisCoords[0] -= MoonYard_Scale
                 screenPos[0] -= MoonYard_Scale
             if(event.key == pygame.K_d):
                 for p in loc:
                     p[0] += MoonYard_Scale
+                for i in range(len(paths)):
+                    for j in range(len(paths[i])):
+                        paths[i][j] = (paths[i][j][0] + MoonYard_Scale, paths[i][j][1])
                 irisCoords[0] += MoonYard_Scale
                 screenPos[0] += MoonYard_Scale
             if(event.key == pygame.K_s):
                 for p in loc:
                     p[1] += MoonYard_Scale
+                for i in range(len(paths)):
+                    for j in range(len(paths[i])):
+                        paths[i][j] = (paths[i][j][0], paths[i][j][1] + MoonYard_Scale)
                 irisCoords[1] += MoonYard_Scale
                 screenPos[1] += MoonYard_Scale
             if(event.key == pygame.K_w):
                 for p in loc:
                     p[1] -= MoonYard_Scale
+                for i in range(len(paths)):
+                    for j in range(len(paths[i])):
+                        paths[i][j] = (paths[i][j][0], paths[i][j][1] - MoonYard_Scale)
                 irisCoords[1] -= MoonYard_Scale
                 screenPos[1] -= MoonYard_Scale              
 
@@ -349,8 +442,35 @@ while not done:
                                 p[4] -= 1
                         poi_selected = False
                         print("Removed POI")
+            elif(event.key == pygame.K_DELETE and path_point_selected):
+                i = cur_path_point[0]
+                j = cur_path_point[1]
+                del(paths[i][j])
+                path_point_selected = False
+
+            if(event.key == pygame.K_p):
+                if path_mode:
+                    path_mode = False
+                    path_point_selected = False
+                else:
+                    path_mode = True
+                    poi_selected = False
+                    cur = None
+
+            if(event.key == pygame.K_1 and path_mode):
+                path_number = 0
+            if(event.key == pygame.K_2 and path_mode):
+                path_number = 1
+            if(event.key == pygame.K_3 and path_mode):
+                path_number = 2
+            if(event.key == pygame.K_4 and path_mode):
+                path_number = 3
+            if(event.key == pygame.K_5 and path_mode):
+                path_number = 4
 
             if(event.key == pygame.K_ESCAPE):
                 pygame.quit()
+
+            clock.tick(30)
 
 pygame.quit()
