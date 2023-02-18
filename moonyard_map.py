@@ -21,13 +21,14 @@ step = 40
 screen = pygame.display.set_mode(size, pygame.RESIZABLE)
 irisCoords = [screen.get_width()/2, screen.get_height()/2, 120, 80]
 pygame.display.set_caption("MoonYard Top-Down")
-moon = pygame.Color(32,32,32)
+moon = pygame.Color(255,255,255)
 red = pygame.Color(220,80,50)
 blue = pygame.Color(50,220,220)
 green = pygame.Color(50,180,100)
-darkblue = pygame.Color(50,140,240)
+darkblue = pygame.Color(60,60,185)
 purple = pygame.Color(140,50,180)
-pink = pygame.Color(200,30,180)
+pink = pygame.Color(250,120,200)
+yellow = pygame.Color(230, 200, 70)
 iris = pygame.Color(255,int(255*.843),0)
 screen.fill(moon)
 pygame.display.flip()
@@ -61,8 +62,25 @@ def getPos():
 
 def addPoi():
     pos = getPos()
-    pygame.draw.circle(screen,blue,pos,radius)
-    loc.append([pos[0],pos[1],int(radius*(my_size/1.25)),blue, len(loc) + 1])
+    pygame.draw.circle(screen,green,pos,radius)
+    num = -1;
+    for i in range(1, len(loc), 1):
+        next = True
+        for p in loc:
+            if(p[4] == i):
+                next = False
+                break
+        if(next):
+            num = i
+            break
+    if(num == -1):
+        largest = 0
+        for p in loc:
+            if(p[4] > largest):
+                largest = p[4]
+        num = largest + 1
+
+    loc.append([pos[0],pos[1],int(radius*(my_size/1.25)),green, num, 0])
     
 
 def addCur(x,y,r):
@@ -72,10 +90,25 @@ def addCur(x,y,r):
 def redrawPoi():
     for p in loc:
         if(p[0] >= -p[2] and p[1] >= -p[2]):    
-            pygame.draw.circle(screen,p[3],(p[0],p[1]),p[2])
-            font = pygame.font.Font(None,30)
-            num = font.render(str(p[4]), True, (0,0,0))
-            screen.blit(num, (p[0]-5, p[1]-10))
+            if(p[5] == 0):
+                pygame.draw.circle(screen,p[3],(p[0],p[1]),p[2])
+                font = pygame.font.Font(None,30)
+                num = font.render(str(p[4]), True, (0,0,0))
+                if(p[3] == darkblue):
+                    num = font.render(str(p[4]), True, (200,200,200))
+                else:
+                    num = font.render(str(p[4]), True, (0,0,0))
+                screen.blit(num, (p[0]-5, p[1]-10))
+            if(p[5] == 1):
+                pygame.draw.rect(screen, p[3], pygame.Rect(p[0] - p[2], p[1] - p[2], 2*p[2], 2*p[2]))
+                font = pygame.font.Font(None,30)
+                num = font.render(str(p[4]), True, (0,0,0))
+                screen.blit(num, (p[0]-5, p[1]-10))
+            if(p[5] == 2):
+                pygame.draw.polygon(screen, p[3], ((p[0],p[1]-p[2]),(p[0]-p[2],p[1]+p[2]),(p[0]+p[2],p[1]+p[2])))
+                font = pygame.font.Font(None,30)
+                num = font.render(str(p[4]), True, (0,0,0))
+                screen.blit(num, (p[0]-5, p[1]))
             #if(p[0] == cur[0] and p[1] == cur[1]):
             #    angle = math.tan((abs(p[1] - rovPos[1]))/(abs(p[0] - rovPos[0])) * math.pi /180)*180/math.pi
             #    font = pygame.font.Font(None,20)
@@ -114,7 +147,10 @@ def redrawCurPathPoint():
 
 def redrawIris():
     surf =  pygame.Surface((120, 80))
-    surf.fill(iris)
+    surf.fill(blue)
+    pygame.draw.rect(surf, (50, 50, 50), pygame.Rect(100, 39, 15, 3))
+    pygame.draw.rect(surf, (50, 50, 50), pygame.Rect(58, 38, 4, 4))
+    
     #set a color key for blitting
     surf.set_colorkey((255, 0, 0))
 
@@ -126,7 +162,7 @@ def redrawIris():
     offset[0] = (oldCenter[0] - screenCen[0] - screenPos[0])
     offset[1] = (oldCenter[1] - screenCen[1] - screenPos[1])
 
-    pygame.draw.circle(screen, iris, rotRect.center, 72, 2)
+    pygame.draw.circle(screen, blue, rotRect.center, 72, 2)
     screen.blit(rotatedSurf, rotRect)
     pygame.display.flip()
 
@@ -141,8 +177,8 @@ def redrawGrid():
             p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos(offset[2] * math.pi / 180))*i- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
             p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos(offset[2] * math.pi / 180))*i- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
             if(i % 3 == 0):
-                pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
-                pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
+                pygame.draw.line(screen, (50, 50, 50), p5, p6, 3)
+                pygame.draw.line(screen, (50, 50, 50), p3, p4, 3)
             else:
                 pygame.draw.line(screen, (100, 100, 100), p5, p6, 2)
                 pygame.draw.line(screen, (100, 100, 100), p3, p4, 2)
@@ -154,8 +190,8 @@ def redrawGrid():
             p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin(offset[2] * math.pi / 180))*i)
             p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin(offset[2] * math.pi / 180))*i)
             if(i % 3 == 0):
-                pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
-                pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
+                pygame.draw.line(screen, (50, 50, 50), p5, p6, 3)
+                pygame.draw.line(screen, (50, 50, 50), p3, p4, 3)
             else:
                 pygame.draw.line(screen, (100, 100, 100), p5, p6, 2)
                 pygame.draw.line(screen, (100, 100, 100), p3, p4, 2)
@@ -167,8 +203,8 @@ def redrawGrid():
             p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
             p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.cos((180 - offset[2]) * math.pi / 180))*i- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000))
             if(i % 3 == 0):
-                pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
-                pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
+                pygame.draw.line(screen, (50, 50, 50), p5, p6, 3)
+                pygame.draw.line(screen, (50, 50, 50), p3, p4, 3)
             else:
                 pygame.draw.line(screen, (100, 100, 100), p5, p6, 2)
                 pygame.draw.line(screen, (100, 100, 100), p3, p4, 2)
@@ -179,8 +215,8 @@ def redrawGrid():
             p3 = (rovPos[0] - int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] + int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
             p4 = (rovPos[0] + int(math.cos(-(90-offset[2]) * math.pi/180) * 3000)- 0, rovPos[1] - int(math.sin(-(90-offset[2]) * math.pi/180) * 3000) - int(step/math.sin((180-offset[2]) * math.pi / 180))*i)
             if(i % 3 == 0):
-                pygame.draw.line(screen, (150, 150, 150), p5, p6, 3)
-                pygame.draw.line(screen, (150, 150, 150), p3, p4, 3)
+                pygame.draw.line(screen, (50, 50, 50), p5, p6, 3)
+                pygame.draw.line(screen, (50, 50, 50), p3, p4, 3)
             else:
                 pygame.draw.line(screen, (100, 100, 100), p5, p6, 2)
                 pygame.draw.line(screen, (100, 100, 100), p3, p4, 2)
@@ -346,8 +382,8 @@ while not done:
             if(event.key == pygame.K_DOWN and poi_selected):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] += math.sin(offset[2] * math.pi / 180) * MoonYard_Scale
-                        p[1] += math.cos(offset[2] * math.pi / 180) * MoonYard_Scale
+                        p[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                        p[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                         if(cur != None):
                             cur[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
@@ -394,52 +430,55 @@ while not done:
                     for j in range(len(paths[i])):
                         paths[i][j] = (paths[i][j][0], paths[i][j][1] - MoonYard_Scale)
                 irisCoords[1] -= MoonYard_Scale
-                screenPos[1] -= MoonYard_Scale              
+                screenPos[1] -= MoonYard_Scale  
 
-            if(event.key == pygame.K_r and poi_selected == True):
+            if(event.key == pygame.K_k and poi_selected == True):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        if(p[3] != red): p[3] = red
-                        else: p[3] = blue
-            if(event.key == pygame.K_g and poi_selected == True):
-                for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        if(p[3] != green): p[3] = green
-                        else: p[3] = blue
-            if(event.key == pygame.K_b and poi_selected == True):
-                for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[3] = blue
+                        if(p[5] == 0): 
+                            p[5] = 1
+                        elif(p[5] == 1): 
+                            p[5] = 2
+                        else:
+                            p[5] = 0          
+
+            # if(event.key == pygame.K_r and poi_selected == True):
+            #     for p in loc:
+            #         if(p[0] == cur[0] and p[1] == cur[1]):
+            #             p[3] = red
+            # if(event.key == pygame.K_g and poi_selected == True):
+            #     for p in loc:
+            #         if(p[0] == cur[0] and p[1] == cur[1]):
+            #             p[3] = green
+            # if(event.key == pygame.K_y and poi_selected == True):
+            #     for p in loc:
+            #         if(p[0] == cur[0] and p[1] == cur[1]):
+            #             p[3] = yellow
             if(event.key == pygame.K_c and poi_selected == True):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
-                        if(p[3] == blue):
-                            p[3] = darkblue
-                        elif(p[3] == darkblue):
-                            p[3] = purple
-                        elif(p[3] == purple):
-                            p[3] = pink 
-                        elif(p[3] == pink): 
+                        if(p[3] == green):
+                            p[3] = yellow
+                        elif(p[3] == yellow):
                             p[3] = red
-            if(event.key == pygame.K_x and poi_selected == True):
-                for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        if(p[3] == red):
-                            p[3] = pink
-                        elif(p[3] == pink):
-                            p[3] = purple
-                        elif(p[3] == purple):
-                            p[3] = darkblue
-                        elif(p[3] == darkblue): 
-                            p[3] = blue
+                        elif(p[3] == red):
+                            p[3] = green
+            # if(event.key == pygame.K_x and poi_selected == True):
+            #     for p in loc:
+            #         if(p[0] == cur[0] and p[1] == cur[1]):
+            #             if(p[3] == red):
+            #                 p[3] = pink
+            #             elif(p[3] == pink):
+            #                 p[3] = purple
+            #             elif(p[3] == purple):
+            #                 p[3] = darkblue
+            #             elif(p[3] == darkblue): 
+            #                 p[3] = blue
             if(event.key == pygame.K_DELETE and poi_selected == True):
                 for p in loc:
                     if(p[0] == cur[0] and p[1] == cur[1]):
                         temp = p
                         loc.remove(p)
-                        for p in loc:
-                            if(p[4] > temp[4]):
-                                p[4] -= 1
                         poi_selected = False
                         print("Removed POI")
             elif(event.key == pygame.K_DELETE and path_point_selected):
@@ -467,6 +506,7 @@ while not done:
                 path_number = 3
             if(event.key == pygame.K_5 and path_mode):
                 path_number = 4
+            
 
             if(event.key == pygame.K_ESCAPE):
                 pygame.quit()
