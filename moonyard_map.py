@@ -225,8 +225,9 @@ def redrawGrid():
 
 
 def redrawAtlas():
+    pygame.draw.rect(screen, (255,255,255), pygame.Rect(0, 0, 300, 30))
     font = pygame.font.Font(None,40)
-    text = font.render(f'X: {offset[0]//4} Y: {offset[1]//4} A: {offset[2]}',False,(150,150,150))
+    text = font.render(f'X: {offset[0]//4} Y: {offset[1]//4} A: {offset[2]}',False,(0,0,0))
     screen.blit(text, (0,0))
 
 def redrawDist():
