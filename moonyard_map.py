@@ -13,6 +13,79 @@ class Key(pygame.sprite.Sprite):
         self.g = 0
         self.b = 255
 
+class Obstacle:
+    def __init__(self, cx, cy, size, color, idnum, shape):
+        self.cx = cx
+        self.cy = cy
+        self.size = size
+        self.color = color
+        self.idnum = idnum
+        self.shape = shape
+    
+    def get_cx(self):
+        return self.cx
+    
+    def change_cx(self, dif):
+        self.cx += dif
+    
+    def get_cy(self):
+        return self.cy
+    
+    def change_cy(self, dif):
+        self.cy += dif
+
+    def get_size(self):
+        return self.size
+    
+    def change_size(self, dif):
+        self.size += dif
+
+    def get_color(self):
+        return self.color
+    
+    def inc_color(self):
+        if(self.color == green):
+            self.color = yellow            
+        elif(self.color == yellow):
+            self.color = red
+        elif(self.color == red):
+            self.color = green
+
+    def get_idnum(self):
+        return self.idnum
+
+    def get_shape(self):
+        return self.shape
+
+    def inc_shape(self):
+        if(self.shape == "circle"):
+            self.shape = "square"            
+        elif(self.shape == "square"):
+            self.shape = "triangle"
+        elif(self.shape == "triangle"):
+            self.shape = "circle"
+
+    def draw(self, screen):
+        if(self.cx >= -self.size and self.cy >= -self.size): 
+            if(self.shape == "circle"):
+                pygame.draw.circle(screen,self.color,(self.cx, self.cy), self.size)
+                font = pygame.font.Font(None,30)
+                num = font.render(str(self.idnum), True, (0,0,0))
+                screen.blit(num, (self.cx-5, self.cy-10))
+            if(self.shape == "square"):
+                pygame.draw.rect(screen, self.color, pygame.Rect(self.cx - self.size, self.cy - self.size, 2*self.size, 2*self.size))
+                font = pygame.font.Font(None,30)
+                num = font.render(str(self.idnum), True, (0,0,0))
+                screen.blit(num, (self.cx-5, self.cy-10))
+            if(self.shape == "triangle"):
+                pygame.draw.polygon(screen, self.color, ((self.cx , self.cy - self.size ), (self.cx - self.size, self.cy + self.size), (self.cx + self.size, self.cy + self.size)))
+                font = pygame.font.Font(None,30)
+                num = font.render(str(self.idnum), True, (0,0,0))
+                screen.blit(num, (self.cx - 5, self.cy))
+        
+
+        
+    
 pygame.init()
 #size = (pygame.display.Info().current_w,pygame.display.Info().current_h)
 size = (1920,1080)
@@ -60,14 +133,15 @@ def getPos():
     pos = pygame.mouse.get_pos()
     return pos
 
+#0 cx, 1 cy, 2 size, 3 color, 4 idnum, 5 shape
+
 def addPoi():
     pos = getPos()
-    pygame.draw.circle(screen,green,pos,radius)
     num = -1;
     for i in range(1, len(loc), 1):
         next = True
         for p in loc:
-            if(p[4] == i):
+            if(p.get_idnum() == i):
                 next = False
                 break
         if(next):
@@ -76,52 +150,26 @@ def addPoi():
     if(num == -1):
         largest = 0
         for p in loc:
-            if(p[4] > largest):
-                largest = p[4]
+            if(p.get_idnum() > largest):
+                largest = p.get_idnum()
         num = largest + 1
 
-    loc.append([pos[0],pos[1],int(radius*(my_size/1.25)),green, num, 0])
-    
+    loc.append(Obstacle(pos[0], pos[1], int(radius*(my_size/1.25)),green, num, "circle"))
+
+def redrawPoi():
+    for p in loc:
+        if(p.get_cx() >= -p.get_size() and p.get_cy() >= -p.get_size()):    
+            p.draw(screen)
 
 def addCur(x,y,r):
     if(not cur == None):
         pygame.draw.circle(screen,green,(x,y),r+10)
 
-def redrawPoi():
-    for p in loc:
-        if(p[0] >= -p[2] and p[1] >= -p[2]):    
-            if(p[5] == 0):
-                pygame.draw.circle(screen,p[3],(p[0],p[1]),p[2])
-                font = pygame.font.Font(None,30)
-                num = font.render(str(p[4]), True, (0,0,0))
-                if(p[3] == darkblue):
-                    num = font.render(str(p[4]), True, (200,200,200))
-                else:
-                    num = font.render(str(p[4]), True, (0,0,0))
-                screen.blit(num, (p[0]-5, p[1]-10))
-            if(p[5] == 1):
-                pygame.draw.rect(screen, p[3], pygame.Rect(p[0] - p[2], p[1] - p[2], 2*p[2], 2*p[2]))
-                font = pygame.font.Font(None,30)
-                num = font.render(str(p[4]), True, (0,0,0))
-                screen.blit(num, (p[0]-5, p[1]-10))
-            if(p[5] == 2):
-                pygame.draw.polygon(screen, p[3], ((p[0],p[1]-p[2]),(p[0]-p[2],p[1]+p[2]),(p[0]+p[2],p[1]+p[2])))
-                font = pygame.font.Font(None,30)
-                num = font.render(str(p[4]), True, (0,0,0))
-                screen.blit(num, (p[0]-5, p[1]))
-            #if(p[0] == cur[0] and p[1] == cur[1]):
-            #    angle = math.tan((abs(p[1] - rovPos[1]))/(abs(p[0] - rovPos[0])) * math.pi /180)*180/math.pi
-            #    font = pygame.font.Font(None,20)
-            #    text = font.render(f'{angle} deg',False,(0,0,0))
-            #    screen.blit(text, (p[0] - 25, p[1] + 10))
-        #text = font.render(f'Dist: {int((math.sqrt(((p[0]-(1920/2))**2)+((p[1]-(1080/2))**2))/my_size))-p[2]} cm  Size: {int(p[2]/(2))} cm',False,(0,0,0))
-        #screen.blit(text, (p[0]-p[2]//2,p[1]-p[2]//2))
-        
 def redrawCur():
     if(not cur == None and poi_selected == True):
         for p in loc:
-            if(p[0] == cur[0] and p[1] == cur[1]):
-                pygame.draw.line(screen,p[3],(irisCoords[0],irisCoords[1]),(p[0],p[1]),3)
+            if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                pygame.draw.line(screen,p.get_color(),(irisCoords[0],irisCoords[1]),(p.get_cx(),p.get_cy()),3)
 
 def addPathPoint():
     pos = getPos()
@@ -150,6 +198,7 @@ def redrawIris():
     surf.fill(blue)
     pygame.draw.rect(surf, (50, 50, 50), pygame.Rect(100, 39, 15, 3))
     pygame.draw.rect(surf, (50, 50, 50), pygame.Rect(58, 38, 4, 4))
+    pygame.draw.rect(surf, (255,0,0), pygame.Rect(15, 15, irisCoords[2] - 30, irisCoords[3] - 30))
     
     #set a color key for blitting
     surf.set_colorkey((255, 0, 0))
@@ -232,7 +281,7 @@ def redrawAtlas():
 
 def redrawDist():
     for p in loc:
-        pygame.draw.line(screen,p[3],(irisCoords[0],irisCoords[1]),(p[0],p[1]),3)
+        pygame.draw.line(screen,p.get_color(),(irisCoords[0],irisCoords[1]),(p.get_cx(),p.get_cy()),3)
 
 def resizeScreen():
     #screen = pygame.display.set_mode((screen.get_width(), screen.get_height()), pygame.RESIZABLE)
@@ -243,7 +292,6 @@ def redrawAll():
     resizeScreen()
     screen.fill(moon)
     redrawGrid()
-    #redrawDist()
     redrawCur()
     redrawPoi()
     redrawPathPoints()
@@ -267,8 +315,7 @@ while not done:
                 poi_selected = False
                 dc = False
                 for i in range(len(loc)):
-                    #if((x>loc[i][0]+(2*loc[i][2]) or x<loc[i][0]-(2*loc[i][2])) or (y>loc[i][1]+(2*loc[i][2]) or y<loc[i][1]-(2*loc[i][2]))):
-                    if((x>loc[i][0]+(1*loc[i][2]) or x<loc[i][0]-(1*loc[i][2])) or (y>loc[i][1]+(1*loc[i][2]) or y<loc[i][1]-(1*loc[i][2]))):
+                    if((x > (loc[i].get_cx() + loc[i].get_size()) or x < (loc[i].get_cx() - loc[i].get_size())) or (y > (loc[i].get_cy() + loc[i].get_size()) or y < (loc[i].get_cy() - loc[i].get_size()))):
                         pass
                     else:
                         print("New POI is too close to an existing POI")
@@ -288,8 +335,8 @@ while not done:
             elif(event.button == 3 and not path_mode):
                 poi_selected = False
                 for i in range(len(loc)):
-                    if((x<loc[i][0]+(loc[i][2]) and x>loc[i][0]-(loc[i][2])) and (y<loc[i][1]+(loc[i][2]) and y>loc[i][1]-(loc[i][2]))):
-                        cur = [loc[i][0],loc[i][1],loc[i][2],green]
+                    if((x < (loc[i].get_cx() + loc[i].get_size()) and x > (loc[i].get_cx() - loc[i].get_size())) and (y < (loc[i].get_cy() + loc[i].get_size()) and y > (loc[i].get_cy() - loc[i].get_size()))):
+                        cur = [loc[i].get_cx(),loc[i].get_cy(),loc[i].get_size(),green]
                         poi_selected = True
                     else:
                         pass
@@ -308,25 +355,25 @@ while not done:
             if(event.button == 4 and poi_selected):
                 i=0
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        loc[i][2] += 5
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        loc[i].change_size(5)
                         cur[2] += 5
                     i+=1
                 pygame.display.update()  
             if(event.button == 5 and poi_selected):
                 i=0
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1] and loc[i][2] > 5):
-                        loc[i][2] -= 5
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1] and loc[i].get_size() > 5):
+                        loc[i].change_size(-5)
                         cur[2] -= 5
                     i+=1
                 pygame.display.update()
         if(event.type == pygame.KEYDOWN):
             if(event.key == pygame.K_LEFT and poi_selected):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
-                        p[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        p.change_cx(-int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale))
+                        p.change_cy(int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale))
                         if(cur != None):
                             cur[0] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
@@ -343,9 +390,9 @@ while not done:
 
             if(event.key == pygame.K_RIGHT and poi_selected):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
-                        p[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        p.change_cx(int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale))
+                        p.change_cy(-int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale))
                         if(cur != None):
                             cur[0] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
@@ -362,9 +409,9 @@ while not done:
 
             if(event.key == pygame.K_UP and poi_selected):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                        p[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        p.change_cx(-int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale))
+                        p.change_cy(-int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale))
                         if(cur != None):
                             cur[0] -= int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] -= int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
@@ -382,9 +429,9 @@ while not done:
 
             if(event.key == pygame.K_DOWN and poi_selected):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        p[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
-                        p[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        p.change_cx(int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale))
+                        p.change_cy(int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale))
                         if(cur != None):
                             cur[0] += int(math.sin(offset[2] * math.pi / 180) * MoonYard_Scale)
                             cur[1] += int(math.cos(offset[2] * math.pi / 180) * MoonYard_Scale)
@@ -402,7 +449,8 @@ while not done:
 
             if(event.key == pygame.K_a):
                 for p in loc:
-                    p[0] -= MoonYard_Scale
+                    p.change_cx(-MoonYard_Scale)
+                    cur[0] -= MoonYard_Scale
                 for i in range(len(paths)):
                     for j in range(len(paths[i])):
                         paths[i][j] = (paths[i][j][0] - MoonYard_Scale, paths[i][j][1])
@@ -410,7 +458,8 @@ while not done:
                 screenPos[0] -= MoonYard_Scale
             if(event.key == pygame.K_d):
                 for p in loc:
-                    p[0] += MoonYard_Scale
+                    p.change_cx(MoonYard_Scale)
+                    cur[0] += MoonYard_Scale
                 for i in range(len(paths)):
                     for j in range(len(paths[i])):
                         paths[i][j] = (paths[i][j][0] + MoonYard_Scale, paths[i][j][1])
@@ -418,7 +467,8 @@ while not done:
                 screenPos[0] += MoonYard_Scale
             if(event.key == pygame.K_s):
                 for p in loc:
-                    p[1] += MoonYard_Scale
+                    p.change_cy(MoonYard_Scale)
+                    cur[1] += MoonYard_Scale
                 for i in range(len(paths)):
                     for j in range(len(paths[i])):
                         paths[i][j] = (paths[i][j][0], paths[i][j][1] + MoonYard_Scale)
@@ -426,7 +476,8 @@ while not done:
                 screenPos[1] += MoonYard_Scale
             if(event.key == pygame.K_w):
                 for p in loc:
-                    p[1] -= MoonYard_Scale
+                    p.change_cy(-MoonYard_Scale)
+                    cur[1] -= MoonYard_Scale
                 for i in range(len(paths)):
                     for j in range(len(paths[i])):
                         paths[i][j] = (paths[i][j][0], paths[i][j][1] - MoonYard_Scale)
@@ -435,13 +486,8 @@ while not done:
 
             if(event.key == pygame.K_k and poi_selected == True):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        if(p[5] == 0): 
-                            p[5] = 1
-                        elif(p[5] == 1): 
-                            p[5] = 2
-                        else:
-                            p[5] = 0          
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        p.inc_shape()         
 
             # if(event.key == pygame.K_r and poi_selected == True):
             #     for p in loc:
@@ -457,13 +503,8 @@ while not done:
             #             p[3] = yellow
             if(event.key == pygame.K_c and poi_selected == True):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
-                        if(p[3] == green):
-                            p[3] = yellow
-                        elif(p[3] == yellow):
-                            p[3] = red
-                        elif(p[3] == red):
-                            p[3] = green
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
+                        p.inc_color()
             # if(event.key == pygame.K_x and poi_selected == True):
             #     for p in loc:
             #         if(p[0] == cur[0] and p[1] == cur[1]):
@@ -477,7 +518,7 @@ while not done:
             #                 p[3] = blue
             if(event.key == pygame.K_DELETE and poi_selected == True):
                 for p in loc:
-                    if(p[0] == cur[0] and p[1] == cur[1]):
+                    if(p.get_cx() == cur[0] and p.get_cy() == cur[1]):
                         temp = p
                         loc.remove(p)
                         poi_selected = False
@@ -507,7 +548,6 @@ while not done:
                 path_number = 3
             if(event.key == pygame.K_5 and path_mode):
                 path_number = 4
-            
 
             if(event.key == pygame.K_ESCAPE):
                 pygame.quit()
